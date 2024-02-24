@@ -1,0 +1,54 @@
+[tool.poetry]
+name = "diagrams"
+version = "0.1.0"
+description = ""
+authors = ["wenke.lai <wenke.studio@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[tool.poetry.group.dev.dependencies]
+# format
+black = "^24.2.0"
+isort = "^5.13.2"
+# lint
+pylint = "^3.0.4"
+mypy = "^1.8.0"
+# test
+pytest = "^8.0.1"
+
+[tool.isort]
+profile = "black"
+
+[tool.pylint.main]
+load-plugins = [
+]
+ignore = [
+]
+
+[tool.pylint.messages_control]
+disable = [
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "too-few-public-methods",
+  "fixme",
+  "too-many-arguments",
+  "too-many-locals",
+]
+
+[tool.pylint.basic]
+good-names = [
+  "_",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
