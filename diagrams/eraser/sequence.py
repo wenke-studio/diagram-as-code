@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+from .base import Graph
 from .properties import Properties
 from .relations import ArrowType, Relations
 
@@ -35,12 +36,6 @@ class Sequence(type):
     @classmethod
     def reset(mcs):
         mcs._graphs = []
-
-
-class Graph:
-
-    def render(self) -> str:
-        pass
 
 
 class Action(Relations, Graph, metaclass=Sequence):

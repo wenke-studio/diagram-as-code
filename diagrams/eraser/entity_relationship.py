@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Callable
 
+from .base import Graph
 from .properties import Properties
 from .relations import EntityRelationshipType, Relations
 
@@ -32,12 +33,6 @@ class EntityRelationship(type):
     @classmethod
     def reset(mcs):
         mcs._graphs = []
-
-
-class Graph:
-
-    def render(self) -> str:
-        raise NotImplementedError("`.render()` method should be implemented")
 
 
 class Relationship(Relations, Graph, metaclass=EntityRelationship):
