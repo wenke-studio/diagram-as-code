@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import os
-from typing import Callable, Optional
+from typing import Callable
+
+from .properties import Properties
 
 __all__ = [
     "EntityRelationship",
@@ -40,36 +42,6 @@ class Graph:
 
     def render(self) -> str:
         raise NotImplementedError("`.render()` method should be implemented")
-
-
-class Properties(Graph):
-    """Class to represent the properties of a graph in the diagram"""
-
-    def __init__(self, icon: Optional[str] = None, color: Optional[str] = None) -> None:
-        """Initialize the icon and color of the graph
-
-        Args:
-            icon (str, optional): The icon of the graph. Defaults to None.
-            color (str, optional): The color of the graph. Defaults to None.
-        """
-        self.icon = icon
-        self.color = color
-
-    def render(self) -> str:
-        """Render the properties as a string
-
-        Returns:
-            str: The properties as a string
-        """
-        props = []
-        if self.icon:
-            props.append(f"icon: {self.icon}")
-        if self.color:
-            props.append(f"color: {self.color}")
-
-        if props:
-            return f"[{', '.join(props)}]"
-        return ""
 
 
 class Edge(Graph):
@@ -119,7 +91,7 @@ class Entity(Graph, metaclass=EntityRelationship):
         self, name: str, icon: str | None = None, color: str | None = None
     ) -> None:
         self.name = name
-        self.properties = Properties(icon, color)
+        self.properties = Properties(icon=icon, color=color)
         self.attributes = []
 
     def add_attribute(self, name: str, data_type: str = "", metadata: str = "") -> None:

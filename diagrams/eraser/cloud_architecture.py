@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from typing import Callable, Optional
 
+from .properties import Properties
+
 __all__ = [
     "CloudArchitecture",
     "Node",
@@ -112,36 +114,6 @@ class Edge:
         return ""
 
 
-class Properties:
-    """Class to represent the properties of a graph in the diagram"""
-
-    def __init__(self, icon: Optional[str] = None, color: Optional[str] = None) -> None:
-        """Initialize the icon and color of the graph
-
-        Args:
-            icon (str, optional): The icon of the graph. Defaults to None.
-            color (str, optional): The color of the graph. Defaults to None.
-        """
-        self.icon = icon
-        self.color = color
-
-    def render(self) -> str:
-        """Render the properties as a string
-
-        Returns:
-            str: The properties as a string
-        """
-        props = []
-        if self.icon:
-            props.append(f"icon: {self.icon}")
-        if self.color:
-            props.append(f"color: {self.color}")
-
-        if props:
-            return f"[{', '.join(props)}]"
-        return ""
-
-
 class Node(Graph, metaclass=CloudArchitecture):
     """Class to represent a node in the diagram"""
 
@@ -157,7 +129,7 @@ class Node(Graph, metaclass=CloudArchitecture):
         """
         self.parent = None
         self.name = name
-        self.properties = Properties(icon, color)
+        self.properties = Properties(icon=icon, color=color)
         self.edges = Edge(self)
 
     def render(self) -> str:
@@ -184,7 +156,7 @@ class Group(Graph, metaclass=CloudArchitecture):
         """
         self.parent = None
         self.name = name
-        self.properties = Properties(icon, color)
+        self.properties = Properties(icon=icon, color=color)
         self.edges = Edge(self)
         self.children: list[Graph] = []
 

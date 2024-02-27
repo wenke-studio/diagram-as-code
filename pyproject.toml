@@ -7,9 +7,11 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+attrs = "^23.2.0"
 
 
 [tool.poetry.group.dev.dependencies]
+ipython = "^8.22.1"
 # format
 black = "^24.2.0"
 isort = "^5.13.2"
