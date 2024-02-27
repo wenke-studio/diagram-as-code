@@ -60,23 +60,32 @@ class CloudArchitecture(type):
 class Graph:
     """Base class for all graphs in the diagram"""
 
-    name: str
+    @property
+    def name(self) -> str:
+        """Graph name"""
+        return self._name
 
-    def render(self) -> str:
-        """Render the graph as a string"""
+    @name.setter
+    def name(self, value: str) -> None:
+        """Set the graph name"""
+        self._name = value
 
     @property
     def parent(self) -> Graph:
-        """Get the parent graph"""
+        """Graph parent"""
         return self._parent
 
     @parent.setter
     def parent(self, graph: Graph) -> None:
-        """Set the parent graph"""
+        """Set the graph parent"""
         self._parent = graph
 
+    def render(self) -> str:
+        """Render the graph as a string"""
+        raise NotImplementedError("`.render()` should be implemented")
 
-class Connection(Relations, metaclass=CloudArchitecture):
+
+class Connection(Relations, Graph, metaclass=CloudArchitecture):
     """Connections represent relationships between nodes and groups.
 
     `Connection` inherit from Relations and register to the CloudArchitecture.
