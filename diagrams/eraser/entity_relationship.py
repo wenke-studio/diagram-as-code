@@ -4,6 +4,7 @@ import os
 from typing import Callable
 
 from .properties import Properties
+from .relations import EntityRelationshipType, Relations
 
 __all__ = [
     "EntityRelationship",
@@ -27,11 +28,6 @@ class EntityRelationship(type):
             stdout = print
         for graph in mcs._graphs:
             stdout(graph.render())
-        for graph in mcs._graphs:
-            for attribute in graph.attributes:
-                output = attribute.edges.render()
-                if output:
-                    stdout(output)
 
     @classmethod
     def reset(mcs):
@@ -44,32 +40,8 @@ class Graph:
         raise NotImplementedError("`.render()` method should be implemented")
 
 
-class Edge(Graph):
-    def __init__(self, source: str) -> None:
-        """Initialize the source and targets of the edge
-
-        Args:
-            source (Attribute): The source attribute
-        """
-        self.source: str = source
-        self.targets: list[tuple[str, str]] = []
-
-    def one_to_many(self, target: str) -> None:
-        self.targets.append(("<", f"{target.parent_name}.{target.name}"))
-
-    def many_to_one(self, target: str) -> None:
-        self.targets.append((">", f"{target.parent_name}.{target.name}"))
-
-    def one_to_one(self, target: str) -> None:
-        self.targets.append(("-", f"{target.parent_name}.{target.name}"))
-
-    def many_to_many(self, target: str) -> None:
-        self.targets.append(("<>", f"{target.parent_name}.{target.name}"))
-
-    def render(self) -> str:
-        return "\n".join(
-            (f"{self.source} {relation} {target}" for relation, target in self.targets)
-        )
+class Relationship(Relations, Graph, metaclass=EntityRelationship):
+    pass
 
 
 class Attribute(Graph):
@@ -80,7 +52,34 @@ class Attribute(Graph):
         self.name = name
         self.data_type = data_type
         self.metadata = metadata
-        self.edges = Edge(f"{self.parent_name}.{self.name}")
+
+    def one_to_one(self, attribute: Attribute) -> None:
+        Relationship(
+            source=f"{self.parent_name}.{self.name}",
+            target=f"{attribute.parent_name}.{attribute.name}",
+            relation=EntityRelationshipType.ONE_TO_ONE,
+        )
+
+    def one_to_many(self, attribute: Attribute) -> None:
+        Relationship(
+            source=f"{self.parent_name}.{self.name}",
+            target=f"{attribute.parent_name}.{attribute.name}",
+            relation=EntityRelationshipType.ONE_TO_MANY,
+        )
+
+    def many_to_one(self, attribute: Attribute) -> None:
+        Relationship(
+            source=f"{self.parent_name}.{self.name}",
+            target=f"{attribute.parent_name}.{attribute.name}",
+            relation=EntityRelationshipType.MANY_TO_ONE,
+        )
+
+    def many_to_many(self, attribute: Attribute) -> None:
+        Relationship(
+            source=f"{self.parent_name}.{self.name}",
+            target=f"{attribute.parent_name}.{attribute.name}",
+            relation=EntityRelationshipType.MANY_TO_MANY,
+        )
 
     def render(self) -> str:
         return f"{self.name} {self.data_type} {self.metadata}".strip()
