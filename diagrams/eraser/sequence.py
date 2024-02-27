@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Callable
 
 from .properties import Properties
+from .relations import ArrowType, Relations
 
 __all__ = [
     "Sequence",
@@ -42,17 +43,8 @@ class Graph:
         pass
 
 
-class Connection(Graph, metaclass=Sequence):
-    def __init__(
-        self, source: Node, message: str, target: Node, arrow: str = ">"
-    ) -> None:
-        self.source = source.name
-        self.message = message
-        self.target = target.name
-        self.arrow = arrow
-
-    def render(self) -> str:
-        return f"{self.source} {self.arrow} {self.target} : {self.message}"
+class Action(Relations, Graph, metaclass=Sequence):
+    pass
 
 
 class StartGroup(Graph, metaclass=Sequence):
@@ -108,17 +100,67 @@ class Node(Graph, metaclass=Sequence):
         self.properties = Properties(icon=icon, color=color)
         self.block = None
 
-    def request(self, message: str, to: Node) -> None:
-        Connection(self, message, to, arrow=">")
+    def request(self, message: str, target: Node) -> None:
+        """
+        Request message from the source node to the target node
 
-    def response(self, message: str, to: Node) -> None:
-        Connection(self, message, to, arrow=">")
+        request: `source > target`
 
-    def start_session(self, message: str, to: Node) -> None:
-        Connection(self, message, to, arrow="<>")
+        Args:
+            message (str): Message to be displayed
+            to (Node): Target node
+        """
+        Action(
+            source=self.name,
+            target=target.name,
+            relation=ArrowType.LEFT_TO_RIGHT_ARROW,
+            label=message,
+        )
+
+    def response(self, message: str, target: Node) -> None:
+        """Response message from the target node to the source node
+
+        response: `source > target`
+
+        Args:
+            message (str): Message to be displayed
+            to (Node): Target node
+        """
+        Action(
+            source=self.name,
+            target=target.name,
+            relation=ArrowType.LEFT_TO_RIGHT_ARROW,
+            label=message,
+        )
+
+    def start_session(self, message: str, target: Node) -> None:
+        """Start a session between the source node and the target node
+
+        session: `source <> target`
+
+        Args:
+            message (str): Message to be displayed
+            to (Node): Target node
+        """
+        Action(
+            source=self.name,
+            target=target.name,
+            relation=ArrowType.BI_DIRECTIONAL_ARROW,
+            label=message,
+        )
 
     def do(self, message: str) -> None:
-        Connection(self, message, self, arrow="-->")  # Dotted arrow
+        """Do something itself
+
+        Args:
+            message (str): Message to be displayed
+        """
+        Action(
+            source=self.name,
+            target=self.name,
+            relation=ArrowType.DOTTED_ARROW,
+            label=message,
+        )
 
     def activate(self) -> None:
         Activation(self.name)
