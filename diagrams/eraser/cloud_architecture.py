@@ -4,6 +4,7 @@ import os
 from typing import Callable, Optional
 
 from .properties import Properties
+from .relations import ArrowType, Relations
 
 __all__ = [
     "CloudArchitecture",
@@ -39,15 +40,10 @@ class CloudArchitecture(type):
         if stdout is None:
             stdout = print
 
-        # nodes and groups
         for graph in mcs._graphs:
+            # sub-groups be rendered by the parent group
             if graph.parent is None:
                 stdout(graph.render())
-        # connections
-        for graph in mcs._graphs:
-            output = graph.edges.render()
-            if output:
-                stdout(output)
 
     @classmethod
     def reset(mcs) -> None:
@@ -80,38 +76,17 @@ class Graph:
         self._parent = graph
 
 
-class Edge:
-    """Class to represent the connections between graphs in the diagram"""
+class Connection(Relations, metaclass=CloudArchitecture):
+    """Connections represent relationships between nodes and groups.
 
-    def __init__(self, source: Graph) -> None:
-        """Initialize the source and targets of the edge
+    `Connection` inherit from Relations and register to the CloudArchitecture.
 
-        Args:
-            source (Graph): The source graph
-        """
-        self.source: str = source.name
-        self.targets: list[str] = []
+    Refs:
+        https://docs.eraser.io/docs/syntax#connections
+    """
 
-    def connect(self, *graphs: Graph) -> None:
-        """Connect the source graph to the target graphs
-
-        Args:
-            *graphs (Graph): The target graphs
-        """
-        for graph in graphs:
-            self.targets.append(graph.name)
-
-    def render(self) -> str:
-        """Render the edge as a string
-
-        Left-to-right arrow
-
-        Returns:
-            str: The edge as a string
-        """
-        if self.targets:
-            return f"{self.source} > {', '.join(self.targets)}"
-        return ""
+    # This is used only in the `draw()` method of Cloud Architecture Diagrams
+    parent = None
 
 
 class Node(Graph, metaclass=CloudArchitecture):
@@ -130,7 +105,12 @@ class Node(Graph, metaclass=CloudArchitecture):
         self.parent = None
         self.name = name
         self.properties = Properties(icon=icon, color=color)
-        self.edges = Edge(self)
+
+    def connect(
+        self, target: Graph, arrow: ArrowType = ArrowType.LEFT_TO_RIGHT_ARROW
+    ) -> None:
+        """Connect the node to another node or group"""
+        Connection(source=self.name, target=target.name, relation=arrow)
 
     def render(self) -> str:
         """Render the node as a string
@@ -157,8 +137,13 @@ class Group(Graph, metaclass=CloudArchitecture):
         self.parent = None
         self.name = name
         self.properties = Properties(icon=icon, color=color)
-        self.edges = Edge(self)
         self.children: list[Graph] = []
+
+    def connect(
+        self, target: Graph, arrow: ArrowType = ArrowType.LEFT_TO_RIGHT_ARROW
+    ) -> None:
+        """Connect the node to another node or group"""
+        Connection(source=self.name, target=target.name, relation=arrow)
 
     def append(self, *graphs: Graph) -> None:
         """Add nodes or groups to the group
